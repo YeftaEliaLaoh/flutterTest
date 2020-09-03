@@ -14,7 +14,7 @@ class RandomWords extends StatefulWidget {
 
 class _RandomWordsState extends State<RandomWords> {
   final _suggestions = <WordPair>[];
-  final _saved = Set<WordPair>();     // NEW
+  final _saved = Set<WordPair>(); // NEW
   final _biggerFont = TextStyle(fontSize: 18.0);
 
   Widget _buildSuggestions() {
@@ -43,7 +43,8 @@ class _RandomWordsState extends State<RandomWords> {
         alreadySaved ? Icons.favorite : Icons.favorite_border,
         color: alreadySaved ? Colors.red : null,
       ),
-      onTap: () {      // NEW lines from here...
+      onTap: () {
+        // NEW lines from here...
         setState(() {
           if (alreadySaved) {
             _saved.remove(pair);
@@ -51,7 +52,7 @@ class _RandomWordsState extends State<RandomWords> {
             _saved.add(pair);
           }
         });
-      },               // ... to here.
+      }, // ... to here.
     );
   }
 
@@ -60,8 +61,42 @@ class _RandomWordsState extends State<RandomWords> {
     return Scaffold(
       appBar: AppBar(
         title: Text('Startup Name Generator'),
+        actions: [
+          IconButton(icon: Icon(Icons.list), onPressed: _pushSaved),
+        ],
       ),
       body: _buildSuggestions(),
+    );
+  }
+
+  void _pushSaved() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        // NEW lines from here...
+        builder: (BuildContext context) {
+          final tiles = _saved.map(
+            (WordPair pair) {
+              return ListTile(
+                title: Text(
+                  pair.asPascalCase,
+                  style: _biggerFont,
+                ),
+              );
+            },
+          );
+          final divided = ListTile.divideTiles(
+            context: context,
+            tiles: tiles,
+          ).toList();
+
+          return Scaffold(
+            appBar: AppBar(
+              title: Text('Saved Suggestions'),
+            ),
+            body: ListView(children: divided),
+          );
+        }, // ...to here.
+      ),
     );
   }
 }
