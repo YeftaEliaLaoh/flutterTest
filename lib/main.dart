@@ -1,49 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
-void main() => runApp(MaterialApp(home: DemoApp()));
-
-class DemoApp extends StatelessWidget {
-  Widget build(BuildContext context) => Scaffold(body: Signature());
+void main() {
+  runApp(SampleApp());
 }
 
-class Signature extends StatefulWidget {
-  SignatureState createState() => SignatureState();
-}
-
-class SignatureState extends State<Signature> {
-  List<Offset> _points = <Offset>[];
+class SampleApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onPanUpdate: (DragUpdateDetails details) {
-        setState(() {
-          RenderBox referenceBox = context.findRenderObject();
-          Offset localPosition =
-          referenceBox.globalToLocal(details.globalPosition);
-          _points = List.from(_points)..add(localPosition);
-        });
-      },
-      onPanEnd: (DragEndDetails details) => _points.add(null),
-      child: CustomPaint(
-        painter: SignaturePainter(_points),
-        size: Size.infinite,
+    return MaterialApp(
+      title: 'Sample Shared App Handler',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
       ),
+      home: SampleAppPage(),
     );
   }
 }
 
-class SignaturePainter extends CustomPainter {
-  SignaturePainter(this.points);
-  final List<Offset> points;
-  void paint(Canvas canvas, Size size) {
-    var paint = Paint()
-      ..color = Colors.black
-      ..strokeCap = StrokeCap.round
-      ..strokeWidth = 5.0;
-    for (int i = 0; i < points.length - 1; i++) {
-      if (points[i] != null && points[i + 1] != null)
-        canvas.drawLine(points[i], points[i + 1], paint);
-    }
+class SampleAppPage extends StatefulWidget {
+  SampleAppPage({Key key}) : super(key: key);
+
+  @override
+  _SampleAppPageState createState() => _SampleAppPageState();
+}
+
+class _SampleAppPageState extends State<SampleAppPage> {
+  static const platform = const MethodChannel('app.channel.shared.data');
+  String dataShared = "No data";
+
+  @override
+  void initState() {
+    super.initState();
+    getSharedText();
   }
 
-  bool shouldRepaint(SignaturePainter other) => other.points != points;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(body: Center(child: Text(dataShared)));
+  }
+
+  getSharedText() async {
+    var sharedData = await platform.invokeMethod("getSharedText");
+    if (sharedData != null) {
+      setState(() {
+        dataShared = sharedData;
+      });
+    }
+  }
 }
