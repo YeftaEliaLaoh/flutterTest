@@ -42,12 +42,13 @@ class _SampleAppPageState extends State<SampleAppPage> {
       appBar: AppBar(
         title: Text("Sample App"),
       ),
-      body: Center(child: Text(textToShow)),
-      floatingActionButton: FloatingActionButton(
-        onPressed: _updateText,
-        tooltip: 'Update Text',
-        child: Icon(Icons.update),
+      body: Center(
+        child: MaterialButton(
+          onPressed: () {},
+          child: Text('Hello'),
+          padding: EdgeInsets.only(left: 10.0, right: 10.0),
+        ),
       ),
     );
-  }
+  }git
 }
