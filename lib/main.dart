@@ -26,14 +26,20 @@ class SampleAppPage extends StatefulWidget {
 }
 
 class _SampleAppPageState extends State<SampleAppPage> {
-  // Default placeholder text
-  String textToShow = "I Like Flutter";
-
-  void _updateText() {
+  // Default value for toggle
+  bool toggle = true;
+  void _toggle() {
     setState(() {
-      // update the text
-      textToShow = "Flutter is Awesome!";
+      toggle = !toggle;
     });
+  }
+
+  _getToggleChild() {
+    if (toggle) {
+      return Text('Toggle One');
+    } else {
+      return MaterialButton(onPressed: () {}, child: Text('Toggle Two'));
+    }
   }
 
   @override
@@ -43,12 +49,13 @@ class _SampleAppPageState extends State<SampleAppPage> {
         title: Text("Sample App"),
       ),
       body: Center(
-        child: MaterialButton(
-          onPressed: () {},
-          child: Text('Hello'),
-          padding: EdgeInsets.only(left: 10.0, right: 10.0),
-        ),
+        child: _getToggleChild(),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _toggle,
+        tooltip: 'Update Text',
+        child: Icon(Icons.update),
       ),
     );
-  }git
+  }
 }
