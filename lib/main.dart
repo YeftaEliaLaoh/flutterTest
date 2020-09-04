@@ -1,16 +1,17 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
+import 'package:http/http.dart' as http;
 
 void main() {
   runApp(SampleApp());
 }
 
 class SampleApp extends StatelessWidget {
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Sample Shared App Handler',
+      title: 'Sample App',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
@@ -27,26 +28,42 @@ class SampleAppPage extends StatefulWidget {
 }
 
 class _SampleAppPageState extends State<SampleAppPage> {
-  static const platform = const MethodChannel('app.channel.shared.data');
-  String dataShared = "No data";
+  List widgets = [];
 
   @override
   void initState() {
     super.initState();
-    getSharedText();
+
+    loadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(body: Center(child: Text(dataShared)));
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Sample App"),
+      ),
+      body: ListView.builder(
+        itemCount: widgets.length,
+        itemBuilder: (BuildContext context, int position) {
+          return getRow(position);
+        },
+      ),
+    );
   }
 
-  getSharedText() async {
-    var sharedData = await platform.invokeMethod("getSharedText");
-    if (sharedData != null) {
-      setState(() {
-        dataShared = sharedData;
-      });
-    }
+  Widget getRow(int i) {
+    return Padding(
+      padding: EdgeInsets.all(10.0),
+      child: Text("Row ${widgets[i]["title"]}"),
+    );
+  }
+
+  Future<void> loadData() async {
+    String dataURL = "https://jsonplaceholder.typicode.com/posts";
+    http.Response response = await http.get(dataURL);
+    setState(() {
+      widgets = json.decode(response.body);
+    });
   }
 }
