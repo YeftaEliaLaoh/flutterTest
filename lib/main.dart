@@ -1,42 +1,49 @@
-import 'package:flutter/widgets.dart';
-
-class LifecycleWatcher extends StatefulWidget {
-  @override
-  _LifecycleWatcherState createState() => _LifecycleWatcherState();
-}
-
-class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBindingObserver {
-  AppLifecycleState _lastLifecycleState;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addObserver(this);
-  }
-
-  @override
-  void dispose() {
-    WidgetsBinding.instance.removeObserver(this);
-    super.dispose();
-  }
-
-  @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    setState(() {
-      _lastLifecycleState = state;
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (_lastLifecycleState == null)
-      return Text('This widget has not observed any lifecycle changes.', textDirection: TextDirection.ltr);
-
-    return Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.',
-        textDirection: TextDirection.ltr);
-  }
-}
+import 'package:flutter/material.dart';
 
 void main() {
-  runApp(Center(child: LifecycleWatcher()));
+  runApp(SampleApp());
+}
+
+class SampleApp extends StatelessWidget {
+  // This widget is the root of your application.
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      title: 'Sample App',
+      theme: ThemeData(
+        primarySwatch: Colors.blue,
+      ),
+      home: SampleAppPage(),
+    );
+  }
+}
+
+class SampleAppPage extends StatefulWidget {
+  SampleAppPage({Key key}) : super(key: key);
+
+  @override
+  _SampleAppPageState createState() => _SampleAppPageState();
+}
+
+class _SampleAppPageState extends State<SampleAppPage> {
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Sample App"),
+      ),
+      body: ListView(children: _getListData()),
+    );
+  }
+
+  List<Widget> _getListData() {
+    List<Widget> widgets = [];
+    for (int i = 0; i < 100; i++) {
+      widgets.add(Padding(
+        padding: EdgeInsets.all(10.0),
+        child: Text("Row $i"),
+      ));
+    }
+    return widgets;
+  }
 }
