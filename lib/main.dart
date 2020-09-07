@@ -1,105 +1,42 @@
-import 'dart:convert';
-import 'dart:isolate';
+import 'package:flutter/widgets.dart';
 
-import 'package:flutter/material.dart';
-import 'package:http/http.dart' as http;
-
-void main() {
-  runApp(SampleApp());
-}
-
-class SampleApp extends StatelessWidget {
+class LifecycleWatcher extends StatefulWidget {
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Sample App',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: SampleAppPage(),
-    );
-  }
+  _LifecycleWatcherState createState() => _LifecycleWatcherState();
 }
 
-class SampleAppPage extends StatefulWidget {
-  SampleAppPage({Key key}) : super(key: key);
-
-  @override
-  _SampleAppPageState createState() => _SampleAppPageState();
-}
-
-class _SampleAppPageState extends State<SampleAppPage> {
-  List widgets = [];
+class _LifecycleWatcherState extends State<LifecycleWatcher> with WidgetsBindingObserver {
+  AppLifecycleState _lastLifecycleState;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
+  }
 
-    loadData();
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _lastLifecycleState = state;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text("Sample App"),
-      ),
-      body: ListView.builder(
-        itemCount: widgets.length,
-        itemBuilder: (BuildContext context, int position) {
-          return getRow(position);
-        },
-      ),
-    );
+    if (_lastLifecycleState == null)
+      return Text('This widget has not observed any lifecycle changes.', textDirection: TextDirection.ltr);
+
+    return Text('The most recent lifecycle state this widget observed was: $_lastLifecycleState.',
+        textDirection: TextDirection.ltr);
   }
+}
 
-  Widget getRow(int i) {
-    return Padding(
-      padding: EdgeInsets.all(10.0),
-      child: Text("Row ${widgets[i]["title"]}"),
-    );
-  }
-
-  Future<void> loadData() async {
-    ReceivePort receivePort = ReceivePort();
-    await Isolate.spawn(dataLoader, receivePort.sendPort);
-
-    // The 'echo' isolate sends its SendPort as the first message.
-    SendPort sendPort = await receivePort.first;
-
-    List msg = await sendReceive(
-      sendPort,
-      "https://jsonplaceholder.typicode.com/posts",
-    );
-
-    setState(() {
-      widgets = msg;
-    });
-  }
-
-// The entry point for the isolate.
-  static Future<void> dataLoader(SendPort sendPort) async {
-    // Open the ReceivePort for incoming messages.
-    ReceivePort port = ReceivePort();
-
-    // Notify any other isolates what port this isolate listens to.
-    sendPort.send(port.sendPort);
-
-    await for (var msg in port) {
-      String data = msg[0];
-      SendPort replyTo = msg[1];
-
-      String dataURL = data;
-      http.Response response = await http.get(dataURL);
-      // Lots of JSON to parse
-      replyTo.send(json.decode(response.body));
-    }
-  }
-
-  Future sendReceive(SendPort port, msg) {
-    ReceivePort response = ReceivePort();
-    port.send([msg, response.sendPort]);
-    return response.first;
-  }
-
+void main() {
+  runApp(Center(child: LifecycleWatcher()));
 }
