@@ -39,9 +39,14 @@ class _SampleAppPageState extends State<SampleAppPage> {
   List<Widget> _getListData() {
     List<Widget> widgets = [];
     for (int i = 0; i < 100; i++) {
-      widgets.add(Padding(
-        padding: EdgeInsets.all(10.0),
-        child: Text("Row $i"),
+      widgets.add(GestureDetector(
+        child: Padding(
+          padding: EdgeInsets.all(10.0),
+          child: Text("Row $i"),
+        ),
+        onTap: () {
+          print('row tapped');
+        },
       ));
     }
     return widgets;
